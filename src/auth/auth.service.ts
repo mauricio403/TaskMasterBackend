@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -47,6 +47,37 @@ export class AuthService {
 
   };
 
+
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
+
+    const { email, userName } = updateUserDto;
+
+    const user = await this.userRepository.preload({ id, email, userName });
+
+    if (!user) throw new NotFoundException('User not found!');
+
+    if (email) {
+      const userExistEmail = await this.userRepository.findOne({ where: { email } });
+      if (userExistEmail) throw new BadRequestException('Email  already exist!');
+    }
+
+    if(userName) {
+      const existUserName = await this.userRepository.findOne({ where: { userName } });
+      if (existUserName) throw new BadRequestException(' user name already exist!');
+    }
+
+
+    await this.userRepository.save(user);
+
+    return {
+      msg: 'User updated successfully!',
+      status: '201',
+      ...user
+    }
+
+  }
+
+
   async loginUser(loginUserDto: LoginUserDto) {
 
     const { email, password } = loginUserDto;
@@ -70,6 +101,10 @@ export class AuthService {
       token: this.getJwtToken({ id: user.id })
     }
 
+  }
+
+  async restorePassowrd(restorePasswordDto: UpdateUserDto) {
+    //TODO
   }
 
 
