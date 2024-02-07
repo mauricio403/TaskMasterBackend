@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from "bcrypt";
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { LoginUserDto } from './dto/login-user.dto';
+import { ResendService } from 'nestjs-resend';
 
 
 @Injectable()
@@ -17,7 +18,8 @@ export class AuthService {
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly resendService: ResendService
 
   ) { }
 
@@ -33,6 +35,13 @@ export class AuthService {
 
       await this.userRepository.save(user);
       delete user.password;
+
+      await this.resendService.send({
+        from:'test@mau.com',
+        to:user.email,
+        subject:'hello world',
+        text:'works!!'
+      });
 
       return {
         msg: 'User created successfully!',
@@ -104,7 +113,7 @@ export class AuthService {
   }
 
   async restorePassowrd(restorePasswordDto: UpdateUserDto) {
-    //TODO
+    //TODO re_7VErGHzC_Jp7Puh3i5KpHtcY4XWxwPrMF
   }
 
 

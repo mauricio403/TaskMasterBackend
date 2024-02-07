@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { ResendModule } from 'nestjs-resend';
 
 @Module({
   controllers: [AuthController],
@@ -27,6 +28,9 @@ import { JwtModule } from '@nestjs/jwt';
           }
         }
       }
+    }),
+    ResendModule.forRoot({
+      apiKey:'re_7VErGHzC_Jp7Puh3i5KpHtcY4XWxwPrMF'
     })
   ],
   exports: [TypeOrmModule,PassportModule, JwtModule]
