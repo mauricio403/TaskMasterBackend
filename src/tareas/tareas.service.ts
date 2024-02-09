@@ -64,13 +64,52 @@ export class TareasService {
 
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
+  async findTaskByUUID(id: string) {
+
+    try {
+
+      const task = await this.taskRepository.findOne({ where: { id } })
+
+      if (!task) throw new NotFoundException('Task Not Found');
+
+      return {
+        msg: 'OK',
+        code: '200',
+        data: task
+      }
+
+
+    } catch (error) {
+      this.handleDBErrors(error);
+    }
+
+
+
   }
 
-  update(id: number, updateTareaDto: UpdateTareaDto) {
-    return `This action updates a #${id} tarea`;
+  async updateTask(id: string, updateTareaDto: UpdateTareaDto) {
+
+    const { description, estado, expiration_date, priority, title } = updateTareaDto;
+
+    const taskToUpdate = await this.taskRepository.preload({ id, description, estado, expiration_date, priority, title });
+
+    if (!taskToUpdate) throw new NotFoundException('Task not found!');
+
+    try {
+      await this.taskRepository.save(taskToUpdate);
+      return {
+        msg:'Task updated successfully!',
+        status: '200',
+      }
+
+    } catch (error) {
+      this.handleDBErrors(error);
+    }
   }
+
+
+
+
 
   remove(id: number) {
     return `This action removes a #${id} tarea`;
