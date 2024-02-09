@@ -36,8 +36,8 @@ export class TareasController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tareasService.remove(+id);
+  removeTask(@Param('id', ParseUUIDPipe) id: string) {
+    return this.tareasService.removeTask(id);
   }
 
 

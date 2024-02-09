@@ -98,7 +98,7 @@ export class TareasService {
     try {
       await this.taskRepository.save(taskToUpdate);
       return {
-        msg:'Task updated successfully!',
+        msg: 'Task updated successfully!',
         status: '200',
       }
 
@@ -111,8 +111,18 @@ export class TareasService {
 
 
 
-  remove(id: number) {
-    return `This action removes a #${id} tarea`;
+  async removeTask(id: string) {
+
+    const task = await this.findTask(id);
+
+    await this.taskRepository.remove(task);
+
+    return {
+      msg: 'Task was removed successfully',
+      status: '200'
+    }
+
+
   }
 
   private handleDBErrors(error: any) {
@@ -121,5 +131,15 @@ export class TareasService {
     }
     console.log(error);
     throw new InternalServerErrorException('Please check internal logs');
+  }
+
+  private async findTask(id: string): Promise<Tarea> {
+
+    const task = await this.taskRepository.findOne({ where: { id } });
+
+    if (!task) throw new NotFoundException('Task not found!');
+
+    return task;
+
   }
 }
