@@ -9,6 +9,7 @@ import * as bcrypt from "bcrypt";
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ResendService } from 'nestjs-resend';
+import { RestorePasswordDTO } from './dto/restore-password.dto';
 
 
 @Injectable()
@@ -37,10 +38,10 @@ export class AuthService {
       delete user.password;
 
       await this.resendService.send({
-        from:'test@mau.com',
-        to:user.email,
-        subject:'hello world',
-        text:'works!!'
+        from: 'test@mau.com',
+        to: user.email,
+        subject: 'hello world',
+        text: 'works!!'
       });
 
       return {
@@ -70,7 +71,7 @@ export class AuthService {
       if (userExistEmail) throw new BadRequestException('Email  already exist!');
     }
 
-    if(userName) {
+    if (userName) {
       const existUserName = await this.userRepository.findOne({ where: { userName } });
       if (existUserName) throw new BadRequestException(' user name already exist!');
     }
@@ -112,13 +113,34 @@ export class AuthService {
 
   }
 
-  async restorePassowrd(restorePasswordDto: UpdateUserDto) {
-    //TODO re_7VErGHzC_Jp7Puh3i5KpHtcY4XWxwPrMF
+  async restorePassowrd(restorePasswordDto: RestorePasswordDTO) {
+
+
+    const { newPassword, oldPassword, userId } = restorePasswordDto;
+
+    const userExist = await this.userRepository.findOne({ where: { id: userId }, select: { id: true, email: true, password: true, userName: true } });
+
+    if (!userExist) throw new NotFoundException('User not found!');
+
+
+    if (!bcrypt.compareSync(oldPassword, userExist.password)) throw new UnauthorizedException('Old password not valid');
+
+    const newPassordToSave = await this.userRepository.preload({
+      ...userExist,
+      password: bcrypt.hashSync(newPassword, 10)
+    });
+
+    try {
+      await this.userRepository.save(newPassordToSave);
+      return {
+        msg: 'Password was changed successfully',
+        status: '200'
+      }
+
+    } catch (error) {
+      this.handleDBErrors(error);
+    }
   }
-
-
-
-
 
 
   private getJwtToken(payload: JwtPayload): string {

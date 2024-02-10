@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { RestorePasswordDTO } from './dto/restore-password.dto';
 
 
 @Controller('auth')
@@ -19,15 +20,16 @@ export class AuthController {
   loginUser(@Body() loginUserDto: LoginUserDto) {
     return this.authService.loginUser(loginUserDto);
   }
+  
+  @Patch('restorePassword')
+  restorePassword(@Body() restorePasswordDto: RestorePasswordDTO) {
+    return this.authService.restorePassowrd(restorePasswordDto);
+  }
 
   @Patch(':id')
   updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.authService.updateUser(id, updateUserDto);
   }
 
-  @Put('restorePassword')
-  restorePassword(@Body() restorePasswordDto: UpdateUserDto) {
-    return this.authService.restorePassowrd(restorePasswordDto);
-  }
 
 }
