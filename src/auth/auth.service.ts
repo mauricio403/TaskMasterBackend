@@ -115,7 +115,6 @@ export class AuthService {
 
   async restorePassowrd(restorePasswordDto: RestorePasswordDTO) {
 
-
     const { newPassword, oldPassword, userId } = restorePasswordDto;
 
     const userExist = await this.userRepository.findOne({ where: { id: userId }, select: { id: true, email: true, password: true, userName: true } });
